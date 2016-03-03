@@ -4,7 +4,8 @@ const app = require('express')();
 const mongoose = require('mongoose');
 const bingSearch = require('bing.search');
 mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost/image-search');
-var bing = new bingSearch('LK/uXGaadWmfyv3KmFc+IMx0d11MxhiAnG7FbOVWKtQ')
+const bing = new bingSearch('LK/uXGaadWmfyv3KmFc+IMx0d11MxhiAnG7FbOVWKtQ')
+var APP_PORT = process.env.PORT ||3000;
 
 var searchSchema = mongoose.Schema({
   term: {
@@ -18,6 +19,14 @@ var searchSchema = mongoose.Schema({
 });
 
 var Search = mongoose.model('search', searchSchema);
+// express configs
+app.set('views','./views');
+app.set('view engine','ejs');
+
+// routes
+app.get('/',function (req,res) {
+  res.render('index');
+})
 
 app.get('/search/:search',function (req,res) {
   var options = {};
@@ -50,9 +59,11 @@ app.get('/search/:search',function (req,res) {
 app.get('/historic', function (req,res) {
   Search.find({}).select({__v:0,_id:0}).exec().then(function (result) {
     res.json(result);
+  }, function (erro) {
+    res.json(erro);
   });
 });
 
-http.createServer(app).listen(3000, () => {
+http.createServer(app).listen(APP_PORT, () => {
   console.log('Server online...');
 });
